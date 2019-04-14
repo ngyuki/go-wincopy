@@ -58,15 +58,18 @@ func copyToClipboard(files []string) {
 
 func getFromClipboard() []string {
 
+	var files []string
+
 	OpenClipboard()
 	defer CloseClipboard()
 
 	mem := GetClipboardData(CF_HDROP)
+	if mem == 0 {
+		return files
+	}
 
 	buf := (*DROPFILES)(GlobalLock(mem))
 	defer GlobalUnlock(mem)
-
-	var files []string
 
 	ptr := (*uint16)(unsafe.Pointer(uintptr(unsafe.Pointer(buf)) + uintptr(buf.pFiles)))
 	for *ptr != 0 {
@@ -127,7 +130,9 @@ func main() {
 		copyToClipboard(flag.Args())
 	} else if flag.NFlag() > 0 {
 		files := getFromClipboard()
-		pasteToSave(*paste, files)
+		if len(files) > 0 {
+			pasteToSave(*paste, files)
+		}
 	} else {
 		flag.Usage()
 	}

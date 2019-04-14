@@ -79,7 +79,9 @@ func GetClipboardData(format uint32) uintptr {
 	r, _, _ := dll.MustFindProc("GetClipboardData").Call(uintptr(format))
 	if r == 0 {
 		err := syscall.GetLastError()
-		panic(err)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return r
 }
