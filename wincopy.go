@@ -106,10 +106,10 @@ func copyFile(dstName string, srcName string) {
 	}
 }
 
-func pasteToSave(files []string) {
+func pasteToSave(dir string, files []string) {
 	for _, file := range files {
 		src := MustAbsPath(file)
-		dst := MustAbsPath(filepath.Base(src))
+		dst := MustAbsPath(filepath.Join(dir, filepath.Base(src)))
 		if dst == src {
 			fmt.Printf("skip: %v\n", src)
 		} else {
@@ -120,13 +120,15 @@ func pasteToSave(files []string) {
 }
 
 func main() {
-	paste := flag.Bool("p", false, "paste flag")
+	paste := flag.String("p", ".", "paste directory")
 	flag.Parse()
 
-	if *paste {
-		files := getFromClipboard()
-		pasteToSave(files)
-	} else {
+	if len(flag.Args()) > 0 {
 		copyToClipboard(flag.Args())
+	} else if flag.NFlag() > 0 {
+		files := getFromClipboard()
+		pasteToSave(*paste, files)
+	} else {
+		flag.Usage()
 	}
 }
